@@ -1,0 +1,56 @@
+{
+  "buckets": {},
+  "services": {
+    "ed2cb874-6f24-48fc-8699-4ce7ac2fef15": {
+      "icon": "https://avatars.githubusercontent.com/u/76623657?s=200&v=4",
+      "name": "stalwart",
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/healthz/live",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/stalwart-v1",
+        "rootDirectory": null
+      },
+      "variables": {
+        "PORT": {
+          "isOptional": false,
+          "description": "Web admin port Railway routes to. Don't change.",
+          "defaultValue": "8080"
+        },
+        "STALWART_RECOVERY_ADMIN": {
+          "isOptional": false,
+          "description": "Administrator login for the web admin, as user:password. Auto-generated.",
+          "defaultValue": "admin:${{secret(24)}}"
+        },
+        "STALWART_PUBLIC_URL": {
+          "isOptional": false,
+          "description": "Public base URL, wired to your Railway domain. Don't change.",
+          "defaultValue": "https://${{RAILWAY_PUBLIC_DOMAIN}}"
+        },
+        "RAILWAY_HEALTHCHECK_TIMEOUT_SEC": {
+          "isOptional": false,
+          "description": "Grace period for the first boot to answer the healthcheck.",
+          "defaultValue": "600"
+        },
+        "STALWART_DEFAULT_DOMAIN": {
+          "isOptional": true,
+          "description": "First mail domain, read once on first boot. Defaults to your Railway domain.",
+          "defaultValue": ""
+        }
+      },
+      "networking": {
+        "serviceDomains": {
+          "<hasDomain>": {}
+        }
+      },
+      "volumeMounts": {
+        "ed2cb874-6f24-48fc-8699-4ce7ac2fef15": {
+          "mountPath": "/data"
+        }
+      }
+    }
+  }
+}

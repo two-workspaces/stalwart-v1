@@ -1,0 +1,8 @@
+{
+  "id": "6ca3911b-27bc-4743-9737-2c8ffa326f0d",
+  "name": "Stalwart",
+  "description": "Mailbox server: JMAP, IMAP, CalDAV, CardDAV, and a web admin.",
+  "category": "Other",
+  "image": "https://raw.githubusercontent.com/stalwartlabs/stalwart/main/img/logo-red.svg",
+  "published": true
+}
