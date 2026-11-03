@@ -49,8 +49,9 @@ railway link     # pick your project and environment
 
    The log should show `version = "1.0.2"`. Check your mail, and sign in to `/admin` as usual.
 
-3. In the Railway dashboard, open the service's Settings → Source and disconnect the old repo. Otherwise an
-   update offered from `two-workspaces/stalwart` could put 0.16 back on your 1.0 store.
+3. In the Railway dashboard, open the service's Settings → Source and disconnect the old repo. Railway may
+   still remember it as the template's source, so don't accept an update from `two-workspaces/stalwart`
+   afterwards: it would put 0.16 back on your 1.0 store.
 
 Once you're sure, free the space:
 
@@ -70,6 +71,7 @@ Mail that 1.0 received isn't in the 0.16 store, so this only suits the time righ
 
 ## How this was tested
 
-Rehearsed on a throwaway copy of the template: a small 0.16.27 store with a few messages, including one written
-just before the move. All of them were there on 1.0.2 and again after going back. Not tested: a large store,
+Rehearsed with these commands on a throwaway copy of the template: a small 0.16.27 store with a few messages,
+including one written just before the move. All of them were there on 1.0.2, and again after going back in a
+separate run. Not tested: a large store,
 calendars and contacts, or real SMTP delivery. Check those first if you depend on them.
