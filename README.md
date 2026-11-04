@@ -34,12 +34,14 @@ Stalwart keeps its entire state in two places: `/etc/stalwart` holds the pointer
 
 **The app lives in a thin wrapper around the official `stalwartlabs/stalwart` image. The wrapper relocates the two persistent paths onto the single Railway volume mounted at `/data`, and finishes Stalwart's first-run setup for you.**
 
-1. Deploy, then open the generated domain at `/admin`. Sign in as `admin` with the password in the `STALWART_RECOVERY_ADMIN` variable.
+1. Deploy, then open the generated domain at `/admin`. Sign in as `admin`. The password is the part after `admin:` in the `STALWART_RECOVERY_ADMIN` variable.
 2. There is no setup wizard to go through. Stalwart's wizard can't sign in behind Railway's TLS, so the first boot does the same job: **Server Hostname** is your Railway domain, TLS certificates stay with Railway's edge, logs go to Railway's log pane, and DKIM keys are generated. The first mail domain is your Railway domain, unless you set `STALWART_DEFAULT_DOMAIN` before the first deploy. You can add more domains in the admin afterwards.
 3. Create your accounts under **Directory** in the admin.
 4. JMAP and the web admin need nothing further — both are served over the Railway domain. For IMAP or SMTP submission clients, add a TCP proxy per protocol (Settings → Networking → TCP Proxy): 993 for IMAP over TLS, 465 for submission over TLS. Railway answers on a port of its choosing, such as `shuttle.proxy.rlwy.net:15140`, and that port is what your client must use. Pointing a custom domain at the proxy replaces the hostname only — the port stays.
 
 **OAuth clients:** Stalwart 1.0 refuses clients it doesn't know. A webmail or other app signing in with OAuth needs a client under Directory → OAuth Clients. The [JMAP Webmail template](https://railway.com/deploy/stalwart-webmail?referralCode=sLjDXb) needs **First-party application** on under Access.
+
+**Upgrading to 1.0.3:** new permissions don't reach the default roles on an existing server. Add the variable `STALWART_UPDATE_ROLE_PERMISSIONS=true`, let the service restart once, then remove it. Third-party OAuth apps also need the new Stalwart scopes on their OAuth client. The web admin needs nothing.
 
 **Limits worth knowing before you deploy:**
 
