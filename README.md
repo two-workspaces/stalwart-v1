@@ -39,9 +39,9 @@ Stalwart keeps its entire state in two places: `/etc/stalwart` holds the pointer
 3. Create your accounts under **Directory** in the admin.
 4. JMAP and the web admin need nothing further — both are served over the Railway domain. For IMAP or SMTP submission clients, add a TCP proxy per protocol (Settings → Networking → TCP Proxy): 993 for IMAP over TLS, 465 for submission over TLS. Railway answers on a port of its choosing, such as `shuttle.proxy.rlwy.net:15140`, and that port is what your client must use. Pointing a custom domain at the proxy replaces the hostname only — the port stays.
 
-**OAuth clients:** Stalwart 1.0 refuses clients it doesn't know. A webmail or other app signing in with OAuth needs a client under Directory → OAuth Clients. The [JMAP Webmail template](https://railway.com/deploy/stalwart-webmail?referralCode=sLjDXb) needs **First-party application** on under Access.
+**OAuth clients:** Stalwart 1.0 refuses clients it doesn't know. A webmail or other app signing in with OAuth needs a client under Directory → OAuth Clients that lists every scope the app asks for, or sign-in fails with `invalid_scope`. The [JMAP Webmail template](https://railway.com/deploy/stalwart-webmail?referralCode=sLjDXb) needs mail, contacts, calendars, files and security.
 
-**Upgrading to 1.0.3:** new permissions don't reach the default roles on an existing server. Add the variable `STALWART_UPDATE_ROLE_PERMISSIONS=true`, let the service restart once, then remove it. Third-party OAuth apps also need the new Stalwart scopes on their OAuth client. The web admin needs nothing.
+**Upgrading to 1.0.3:** new permissions don't reach the default roles on an existing server. Add the variable `STALWART_UPDATE_ROLE_PERMISSIONS=true`, let the service restart once, then remove it. 1.0.3 also removes the First-party setting, which its release notes don't mention. Those clients become ordinary ones with no scopes, so list their scopes before upgrading, or sign-in fails with `invalid_scope`. Their existing sessions sign in again once either way. The web admin needs nothing.
 
 **Limits worth knowing before you deploy:**
 
