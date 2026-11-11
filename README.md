@@ -41,6 +41,8 @@ Stalwart keeps its entire state in two places: `/etc/stalwart` holds the pointer
 
 **OAuth clients:** Stalwart 1.0 refuses clients it doesn't know. A webmail or other app signing in with OAuth needs a client under Directory → OAuth Clients that lists every scope the app asks for, or sign-in fails with `invalid_scope`. The [JMAP Webmail template](https://railway.com/deploy/stalwart-webmail?referralCode=sLjDXb) needs mail, contacts, calendars, files and security.
 
+**Upgrading to 1.1.0:** passkeys need new permissions that the default roles on an existing server don't have. To use passkeys, add the variable `STALWART_UPDATE_ROLE_PERMISSIONS=true`, let the service restart once, then remove it. Everything else works without that step.
+
 **Upgrading to 1.0.3:** new permissions don't reach the default roles on an existing server. Add the variable `STALWART_UPDATE_ROLE_PERMISSIONS=true`, let the service restart once, then remove it. 1.0.3 also removes the First-party setting, which its release notes don't mention. Those clients become ordinary ones with no scopes, so list their scopes before upgrading, or sign-in fails with `invalid_scope`. Their existing sessions sign in again once either way. The web admin needs nothing.
 
 **Limits worth knowing before you deploy:**
