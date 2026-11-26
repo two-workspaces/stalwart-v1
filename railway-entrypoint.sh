@@ -60,8 +60,11 @@ first_boot_setup() {
 # back to 0.16. So never start it on a store that isn't known to be 1.0: a store
 # is marked when a fresh install creates it, or by hand after stalwart-migrate.
 marker=/etc/stalwart/.stalwart-v1-store
+roles_marker=/etc/stalwart/.role-permissions-1.2
+webui_marker=/etc/stalwart/.webui-1.2
 if [ ! -s /etc/stalwart/config.json ]; then
-  touch "$marker"
+  # A fresh store gets 1.2's default roles and the current WebUI already.
+  touch "$marker" "$roles_marker" "$webui_marker"
 elif [ ! -e "$marker" ]; then
   echo "railway-entrypoint: this volume holds a Stalwart 0.16 store, which this version must not open." >&2
   echo "railway-entrypoint: not starting, and nothing was changed. Roll this service back to its previous deployment." >&2
@@ -71,6 +74,50 @@ fi
 
 if [ ! -s /etc/stalwart/config.json ] && [ -n "$RAILWAY_PUBLIC_DOMAIN" ] && [ -n "$STALWART_RECOVERY_ADMIN" ]; then
   first_boot_setup "$@"
+fi
+
+# Stalwart 1.2 adds permissions (mail rules, junk e-mail lists, calendar settings,
+# Exchange) that default roles made by an earlier version lack, and its new pages
+# need WebUI 2.1, while a stored WebUI bundle is only fetched again after 90 days.
+# Do both once on a store from an earlier version. STALWART_UPDATE_ROLE_PERMISSIONS
+# only adds permissions a default role lacks and skips any in its disabledPermissions,
+# but left set it would re-add removed ones on every boot, so a marker on the volume
+# keeps it to boots before the first healthy one.
+upgrade_after_start() {
+  port=8080
+  tries=0
+  until curl -fsS -o /dev/null "http://127.0.0.1:$port/healthz/live" 2>/dev/null; do
+    tries=$((tries + 1))
+    if [ "$tries" -gt 600 ]; then return; fi
+    sleep 1
+  done
+  if [ ! -e "$roles_marker" ]; then
+    touch "$roles_marker"
+    echo "railway-entrypoint: added Stalwart 1.2's new permissions to the default roles"
+  fi
+  if [ ! -e "$webui_marker" ]; then
+    if [ -z "$STALWART_RECOVERY_ADMIN" ]; then
+      echo "railway-entrypoint: to get WebUI 2.1, run Management > Actions > Update applications in the admin" >&2
+      touch "$webui_marker"
+      return
+    fi
+    body='{"using":["urn:ietf:params:jmap:core","urn:stalwart:jmap"],"methodCalls":[["x:Action/set",{"create":{"a1":{"@type":"UpdateApps"}}},"0"]]}'
+    response=$(curl -sS -m 300 -u "$STALWART_RECOVERY_ADMIN" -H 'Content-Type: application/json' \
+      -d "$body" "http://127.0.0.1:$port/jmap/" 2>&1) || true
+    case "$response" in
+      *'"created":{"a1"'*)
+        touch "$webui_marker"
+        echo "railway-entrypoint: updated the WebUI for Stalwart 1.2" ;;
+      *) echo "railway-entrypoint: WebUI update failed, will retry on the next boot: $response" >&2 ;;
+    esac
+  fi
+}
+
+if [ ! -e "$roles_marker" ] && [ -z "$STALWART_UPDATE_ROLE_PERMISSIONS" ]; then
+  export STALWART_UPDATE_ROLE_PERMISSIONS=true
+fi
+if [ ! -e "$roles_marker" ] || [ ! -e "$webui_marker" ]; then
+  upgrade_after_start &
 fi
 
 exec /usr/local/bin/stalwart "$@"
